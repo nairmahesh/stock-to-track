@@ -215,7 +215,6 @@ const Auth = () => {
                     value={signupData.password}
                     onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
                     required
-                    minLength={6}
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>

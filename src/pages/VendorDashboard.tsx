@@ -14,6 +14,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Package, FileText } from "lucide-react";
 import { toast } from "sonner";
 
+interface OrderItem {
+  id: string;
+  quantity: number;
+  product: {
+    name: string;
+    category: string | null;
+    sku: string | null;
+  } | null;
+}
+
 interface Order {
   id: string;
   order_number: string;
@@ -26,6 +36,7 @@ interface Order {
     full_name: string;
     company_name: string;
   } | null;
+  order_items?: OrderItem[];
 }
 
 const VendorDashboard = () => {
@@ -78,6 +89,15 @@ const VendorDashboard = () => {
           profiles!orders_dealer_id_fkey (
             full_name,
             company_name
+          ),
+          order_items (
+            id,
+            quantity,
+            product:products (
+              name,
+              category,
+              sku
+            )
           )
         `)
         .order("created_at", { ascending: false });
@@ -141,6 +161,29 @@ const VendorDashboard = () => {
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
+        {order.order_items && order.order_items.length > 0 && (
+          <div className="p-3 bg-muted rounded-lg space-y-2">
+            <p className="text-sm font-medium mb-2">Collateral Items:</p>
+            <div className="space-y-2">
+              {order.order_items.map((item) => (
+                <div key={item.id} className="flex items-center justify-between text-sm">
+                  <div className="flex-1">
+                    <p className="font-medium">{item.product?.name || "Unknown Product"}</p>
+                    {item.product?.category && (
+                      <p className="text-xs text-muted-foreground">{item.product.category}</p>
+                    )}
+                  </div>
+                  <div className="text-right">
+                    <p className="font-medium">Qty: {item.quantity}</p>
+                    {item.product?.sku && (
+                      <p className="text-xs text-muted-foreground">SKU: {item.product.sku}</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         {order.notes && (
           <div className="p-3 bg-muted rounded-lg">
             <p className="text-sm font-medium mb-1">Order Notes:</p>

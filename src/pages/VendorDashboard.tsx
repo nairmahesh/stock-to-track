@@ -39,9 +39,19 @@ interface Order {
   order_items?: OrderItem[];
 }
 
+interface Product {
+  id: string;
+  name: string;
+  category: string | null;
+  sku: string | null;
+  description: string | null;
+  image_url: string | null;
+}
+
 const VendorDashboard = () => {
   const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [updateData, setUpdateData] = useState<{
@@ -59,6 +69,7 @@ const VendorDashboard = () => {
   useEffect(() => {
     checkAuth();
     fetchOrders();
+    fetchProducts();
   }, []);
 
   const checkAuth = async () => {
@@ -68,13 +79,18 @@ const VendorDashboard = () => {
       return;
     }
 
-    const { data: profile } = await supabase
+    const { data: profile, error } = await supabase
       .from("profiles")
       .select("role")
       .eq("id", user.id)
-      .single();
+      .maybeSingle();
 
-    if (profile?.role !== "vendor") {
+    if (error) {
+      toast.error("Unable to verify role. Please try again.");
+      return; // Avoid redirect loop if backend momentarily fails
+    }
+
+    if (profile && profile.role !== "vendor") {
       toast.error("Access denied");
       navigate("/auth");
     }
@@ -108,6 +124,20 @@ const VendorDashboard = () => {
       toast.error("Failed to fetch orders");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchProducts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("products")
+        .select("id, name, category, sku, description, image_url")
+        .eq("is_active", true)
+        .order("name", { ascending: true });
+      if (error) throw error;
+      setProducts(data || []);
+    } catch (error: any) {
+      toast.error("Failed to fetch collateral items");
     }
   };
 
@@ -276,6 +306,37 @@ const VendorDashboard = () => {
             <FileText className="h-4 w-4 mr-2" />
             Raise Invoice
           </Button>
+        </div>
+
+        <div className="space-y-3">
+          <h3 className="text-xl font-semibold">Collateral Catalog</h3>
+          {products.length === 0 ? (
+            <Card>
+              <CardContent className="py-8 text-center">
+                <Package className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
+                <p className="text-muted-foreground">No active collaterals</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {products.map((p) => (
+                <Card key={p.id} className="hover:shadow-sm transition-shadow">
+                  <CardHeader>
+                    <CardTitle className="text-base">{p.name}</CardTitle>
+                    {p.category && <CardDescription>{p.category}</CardDescription>}
+                  </CardHeader>
+                  <CardContent>
+                    {p.description && (
+                      <p className="text-sm text-muted-foreground">{p.description}</p>
+                    )}
+                    {p.sku && (
+                      <p className="text-xs text-muted-foreground mt-2">SKU: {p.sku}</p>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
 
         <Tabs defaultValue="pending" className="w-full">

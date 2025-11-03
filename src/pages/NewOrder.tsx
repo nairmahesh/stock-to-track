@@ -7,14 +7,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Plus, Minus, ShoppingCart } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ArrowLeft, Plus, Minus, ShoppingCart, Search, Package, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
 
 interface Product {
   id: string;
   name: string;
-  description: string;
-  category: string;
+  description: string | null;
+  category: string | null;
+  sku: string | null;
+  image_url: string | null;
 }
 
 interface OrderItem {
@@ -26,26 +30,60 @@ interface OrderItem {
 const NewOrder = () => {
   const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  useEffect(() => {
+    filterProducts();
+  }, [products, searchQuery, selectedCategory]);
 
   const fetchProducts = async () => {
     try {
       const { data, error } = await supabase
         .from("products")
         .select("*")
-        .eq("is_active", true);
+        .eq("is_active", true)
+        .order("name");
 
       if (error) throw error;
       setProducts(data || []);
+      setFilteredProducts(data || []);
     } catch (error: any) {
       toast.error("Failed to fetch products");
     }
+  };
+
+  const filterProducts = () => {
+    let filtered = products;
+
+    if (searchQuery) {
+      filtered = filtered.filter(
+        (p) =>
+          p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          p.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          p.sku?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    if (selectedCategory !== "all") {
+      filtered = filtered.filter((p) => p.category === selectedCategory);
+    }
+
+    setFilteredProducts(filtered);
+  };
+
+  const categories = ["all", ...Array.from(new Set(products.map((p) => p.category).filter(Boolean)))];
+
+  const getItemQuantity = (productId: string) => {
+    return orderItems.find((item) => item.productId === productId)?.quantity || 0;
   };
 
   const addItem = (product: Product) => {
@@ -133,31 +171,107 @@ const NewOrder = () => {
 
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Create New Order</h2>
-          <p className="text-muted-foreground">Select products and quantities for your order</p>
+          <p className="text-muted-foreground">Browse and select collateral items</p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Available Products</h3>
-            {products.map((product) => (
-              <Card key={product.id} className="hover:shadow-md transition-shadow">
-                <CardHeader>
-                  <CardTitle className="text-base">{product.name}</CardTitle>
-                  <CardDescription>{product.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button onClick={() => addItem(product)} className="w-full" size="sm">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add to Order
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
+        <div className="grid lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-4">
+            <div className="space-y-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search products by name, description, or SKU..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+
+              <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
+                <TabsList className="w-full justify-start overflow-x-auto flex-wrap h-auto">
+                  {categories.map((cat) => (
+                    <TabsTrigger key={cat} value={cat} className="capitalize">
+                      {cat === "all" ? "All Products" : cat}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </Tabs>
+            </div>
+
+            <div className="grid gap-4">
+              {filteredProducts.length === 0 ? (
+                <Card>
+                  <CardContent className="py-12 text-center">
+                    <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground">No products found</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                filteredProducts.map((product) => {
+                  const itemQty = getItemQuantity(product.id);
+                  return (
+                    <Card key={product.id} className="hover:shadow-md transition-shadow">
+                      <CardHeader>
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <CardTitle className="text-base flex items-center gap-2">
+                              {product.name}
+                              {product.category && (
+                                <Badge variant="outline" className="text-xs">
+                                  {product.category}
+                                </Badge>
+                              )}
+                            </CardTitle>
+                            {product.description && (
+                              <CardDescription className="mt-1">
+                                {product.description}
+                              </CardDescription>
+                            )}
+                            {product.sku && (
+                              <p className="text-xs text-muted-foreground mt-1">
+                                SKU: {product.sku}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        {itemQty > 0 ? (
+                          <div className="flex items-center gap-2">
+                            <Button
+                              size="icon"
+                              variant="outline"
+                              onClick={() => updateQuantity(product.id, -1)}
+                            >
+                              <Minus className="h-4 w-4" />
+                            </Button>
+                            <span className="w-12 text-center font-bold text-lg">
+                              {itemQty}
+                            </span>
+                            <Button
+                              size="icon"
+                              variant="outline"
+                              onClick={() => updateQuantity(product.id, 1)}
+                            >
+                              <Plus className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <Button onClick={() => addItem(product)} className="w-full" size="sm">
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add to Cart
+                          </Button>
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })
+              )}
+            </div>
           </div>
 
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Order Summary</h3>
-            <Card>
+          <div className="space-y-4 lg:sticky lg:top-6">
+            <Card className="shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <ShoppingCart className="h-5 w-5" />

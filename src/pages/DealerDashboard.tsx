@@ -5,7 +5,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Package, Clock, CheckCircle, XCircle, Truck } from "lucide-react";
+import { Plus, Package, Clock, CheckCircle, XCircle, Truck, ShoppingCart, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
 
 interface Order {
@@ -19,14 +19,24 @@ interface Order {
   tracking_number: string | null;
 }
 
+interface Product {
+  id: string;
+  name: string;
+  category: string | null;
+  sku: string | null;
+  description: string | null;
+}
+
 const DealerDashboard = () => {
   const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     checkAuth();
     fetchOrders();
+    fetchProducts();
   }, []);
 
   const checkAuth = async () => {
@@ -65,6 +75,22 @@ const DealerDashboard = () => {
       toast.error("Failed to fetch orders");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchProducts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("products")
+        .select("id, name, category, sku, description")
+        .eq("is_active", true)
+        .order("name")
+        .limit(6);
+
+      if (error) throw error;
+      setProducts(data || []);
+    } catch (error: any) {
+      console.error("Failed to fetch products:", error);
     }
   };
 
@@ -108,81 +134,137 @@ const DealerDashboard = () => {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-3xl font-bold tracking-tight">Your Orders</h2>
-            <p className="text-muted-foreground">Place and track your merchandise orders</p>
+            <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+            <p className="text-muted-foreground">Manage your collateral orders</p>
           </div>
           <Button onClick={() => navigate("/dealer/new-order")} size="lg">
-            <Plus className="h-5 w-5 mr-2" />
+            <ShoppingCart className="h-5 w-5 mr-2" />
             New Order
           </Button>
         </div>
 
-        {loading ? (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">Loading orders...</p>
-          </div>
-        ) : orders.length === 0 ? (
+        {products.length > 0 && (
           <Card>
-            <CardContent className="py-12 text-center">
-              <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No orders yet</h3>
-              <p className="text-muted-foreground mb-4">
-                Start by placing your first order
-              </p>
-              <Button onClick={() => navigate("/dealer/new-order")}>
-                <Plus className="h-4 w-4 mr-2" />
-                Place Order
-              </Button>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Package className="h-5 w-5" />
+                    Available Collaterals
+                  </CardTitle>
+                  <CardDescription>Browse our product catalog</CardDescription>
+                </div>
+                <Button variant="outline" onClick={() => navigate("/dealer/new-order")}>
+                  View All
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {products.map((product) => (
+                  <Card key={product.id} className="hover:shadow-sm transition-shadow">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-sm flex items-center gap-2">
+                        {product.name}
+                        {product.category && (
+                          <Badge variant="secondary" className="text-xs">
+                            {product.category}
+                          </Badge>
+                        )}
+                      </CardTitle>
+                      {product.description && (
+                        <CardDescription className="text-xs line-clamp-2">
+                          {product.description}
+                        </CardDescription>
+                      )}
+                    </CardHeader>
+                    {product.sku && (
+                      <CardContent className="pt-0">
+                        <p className="text-xs text-muted-foreground">SKU: {product.sku}</p>
+                      </CardContent>
+                    )}
+                  </Card>
+                ))}
+              </div>
             </CardContent>
           </Card>
-        ) : (
-          <div className="grid gap-4">
-            {orders.map((order) => (
-              <Card key={order.id} className="hover:shadow-md transition-shadow">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="flex items-center gap-2">
-                        {order.order_number}
-                        <Badge variant="outline" className={getStatusColor(order.status)}>
-                          {getStatusIcon(order.status)}
-                          <span className="ml-1 capitalize">{order.status.replace("_", " ")}</span>
-                        </Badge>
-                      </CardTitle>
-                      <CardDescription>
-                        Placed on {new Date(order.created_at).toLocaleDateString()}
-                      </CardDescription>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm text-muted-foreground">Items</p>
-                      <p className="text-2xl font-bold">{order.total_items}</p>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {order.vendor_comments && (
-                    <div className="p-3 bg-muted rounded-lg">
-                      <p className="text-sm font-medium mb-1">Vendor Comments:</p>
-                      <p className="text-sm text-muted-foreground">{order.vendor_comments}</p>
-                    </div>
-                  )}
-                  {order.tracking_number && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Truck className="h-4 w-4 text-primary" />
-                      <span className="font-medium">Tracking:</span>
-                      <span className="font-mono">{order.tracking_number}</span>
-                    </div>
-                  )}
-                  {order.courier_details && (
-                    <div className="text-sm">
-                      <span className="font-medium">Courier:</span> {order.courier_details}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
         )}
+
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-semibold">Your Orders</h3>
+            {orders.length > 0 && (
+              <Badge variant="secondary">{orders.length} total</Badge>
+            )}
+          </div>
+
+          {loading ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">Loading...</p>
+            </div>
+          ) : orders.length === 0 ? (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No orders yet</h3>
+                <p className="text-muted-foreground mb-4">
+                  Start by placing your first order
+                </p>
+                <Button onClick={() => navigate("/dealer/new-order")}>
+                  <ShoppingCart className="h-4 w-4 mr-2" />
+                  Place Order
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-4">
+              {orders.map((order) => (
+                <Card key={order.id} className="hover:shadow-md transition-shadow">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="flex items-center gap-2">
+                          {order.order_number}
+                          <Badge variant="outline" className={getStatusColor(order.status)}>
+                            {getStatusIcon(order.status)}
+                            <span className="ml-1 capitalize">{order.status.replace("_", " ")}</span>
+                          </Badge>
+                        </CardTitle>
+                        <CardDescription>
+                          Placed on {new Date(order.created_at).toLocaleDateString()}
+                        </CardDescription>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-muted-foreground">Items</p>
+                        <p className="text-2xl font-bold">{order.total_items}</p>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {order.vendor_comments && (
+                      <div className="p-3 bg-muted rounded-lg">
+                        <p className="text-sm font-medium mb-1">Vendor Comments:</p>
+                        <p className="text-sm text-muted-foreground">{order.vendor_comments}</p>
+                      </div>
+                    )}
+                    {order.tracking_number && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Truck className="h-4 w-4 text-primary" />
+                        <span className="font-medium">Tracking:</span>
+                        <span className="font-mono">{order.tracking_number}</span>
+                      </div>
+                    )}
+                    {order.courier_details && (
+                      <div className="text-sm">
+                        <span className="font-medium">Courier:</span> {order.courier_details}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </DashboardLayout>
   );

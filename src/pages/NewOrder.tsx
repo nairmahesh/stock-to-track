@@ -171,7 +171,7 @@ const NewOrder = () => {
 
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Create New Order</h2>
-          <p className="text-muted-foreground">Browse and select collateral items</p>
+          <p className="text-muted-foreground">Browse and select merchandise items</p>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">

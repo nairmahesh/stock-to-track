@@ -13,7 +13,7 @@ const Index = () => {
         <header className="text-center mb-16 pt-8">
           <img src={logo} alt="Motilal Oswal" className="h-20 mx-auto mb-6" />
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-            Collateral Ordering System
+            Merchandise Ordering System
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Streamline your merchandise ordering process with our comprehensive platform

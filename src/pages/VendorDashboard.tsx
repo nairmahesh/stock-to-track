@@ -137,7 +137,7 @@ const VendorDashboard = () => {
       if (error) throw error;
       setProducts(data || []);
     } catch (error: any) {
-      toast.error("Failed to fetch collateral items");
+      toast.error("Failed to fetch merchandise items");
     }
   };
 
@@ -193,7 +193,7 @@ const VendorDashboard = () => {
       <CardContent className="space-y-3">
         {order.order_items && order.order_items.length > 0 && (
           <div className="p-3 bg-muted rounded-lg space-y-2">
-            <p className="text-sm font-medium mb-2">Collateral Items:</p>
+            <p className="text-sm font-medium mb-2">Order Items:</p>
             <div className="space-y-2">
               {order.order_items.map((item) => (
                 <div key={item.id} className="flex items-center justify-between text-sm">
@@ -309,12 +309,12 @@ const VendorDashboard = () => {
         </div>
 
         <div className="space-y-3">
-          <h3 className="text-xl font-semibold">Collateral Catalog</h3>
+          <h3 className="text-xl font-semibold">Merchandise Catalog</h3>
           {products.length === 0 ? (
             <Card>
               <CardContent className="py-8 text-center">
                 <Package className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
-                <p className="text-muted-foreground">No active collaterals</p>
+                <p className="text-muted-foreground">No active merchandise</p>
               </CardContent>
             </Card>
           ) : (

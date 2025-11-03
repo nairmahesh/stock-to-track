@@ -135,7 +135,7 @@ const DealerDashboard = () => {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-            <p className="text-muted-foreground">Manage your collateral orders</p>
+            <p className="text-muted-foreground">Manage your merchandise orders</p>
           </div>
           <Button onClick={() => navigate("/dealer/new-order")} size="lg">
             <ShoppingCart className="h-5 w-5 mr-2" />
@@ -150,7 +150,7 @@ const DealerDashboard = () => {
                 <div>
                   <CardTitle className="flex items-center gap-2">
                     <Package className="h-5 w-5" />
-                    Available Collaterals
+                    Available Merchandise
                   </CardTitle>
                   <CardDescription>Browse our product catalog</CardDescription>
                 </div>

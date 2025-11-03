@@ -105,7 +105,7 @@ const Auth = () => {
         <CardHeader className="text-center space-y-4">
           <img src={logo} alt="Motilal Oswal" className="h-16 mx-auto" />
           <div>
-            <CardTitle className="text-2xl">Collateral Ordering System</CardTitle>
+            <CardTitle className="text-2xl">Merchandise Ordering System</CardTitle>
             <CardDescription>Access your dashboard</CardDescription>
           </div>
         </CardHeader>

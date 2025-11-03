@@ -169,8 +169,11 @@ export type Database = {
           id: string
           image_url: string | null
           is_active: boolean | null
+          min_quantity: number | null
           name: string
+          requires_dimensions: boolean | null
           sku: string | null
+          unit_type: string | null
           updated_at: string | null
         }
         Insert: {
@@ -180,8 +183,11 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean | null
+          min_quantity?: number | null
           name: string
+          requires_dimensions?: boolean | null
           sku?: string | null
+          unit_type?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -191,8 +197,11 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean | null
+          min_quantity?: number | null
           name?: string
+          requires_dimensions?: boolean | null
           sku?: string | null
+          unit_type?: string | null
           updated_at?: string | null
         }
         Relationships: []

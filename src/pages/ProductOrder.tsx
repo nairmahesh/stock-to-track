@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import DashboardLayout from "@/components/DashboardLayout";
+import DealerLayout from "@/components/DealerLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -160,17 +160,17 @@ const ProductOrder = () => {
 
   if (loading) {
     return (
-      <DashboardLayout title="Order Product">
+      <DealerLayout title="Order Product">
         <div className="flex items-center justify-center min-h-[400px]">
           <p className="text-muted-foreground">Loading...</p>
         </div>
-      </DashboardLayout>
+      </DealerLayout>
     );
   }
 
   if (!product) {
     return (
-      <DashboardLayout title="Product Not Found">
+      <DealerLayout title="Product Not Found">
         <Card>
           <CardContent className="py-12 text-center">
             <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
@@ -178,12 +178,12 @@ const ProductOrder = () => {
             <Button onClick={() => navigate("/dealer")}>Back to Dashboard</Button>
           </CardContent>
         </Card>
-      </DashboardLayout>
+      </DealerLayout>
     );
   }
 
   return (
-    <DashboardLayout title="Order Form">
+    <DealerLayout title="Order Form">
       <div className="max-w-4xl mx-auto space-y-6">
         <Button variant="outline" onClick={() => navigate("/dealer")}>
           ← Back to Dashboard
@@ -345,7 +345,7 @@ const ProductOrder = () => {
           </CardContent>
         </Card>
       </div>
-    </DashboardLayout>
+    </DealerLayout>
   );
 };
 

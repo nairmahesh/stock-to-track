@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import DashboardLayout from "@/components/DashboardLayout";
+import DealerLayout from "@/components/DealerLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -162,7 +162,7 @@ const NewOrder = () => {
   };
 
   return (
-    <DashboardLayout title="New Order">
+    <DealerLayout title="New Order">
       <div className="max-w-4xl mx-auto space-y-6">
         <Button variant="ghost" onClick={() => navigate("/dealer")}>
           <ArrowLeft className="h-4 w-4 mr-2" />
@@ -347,7 +347,7 @@ const NewOrder = () => {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </DealerLayout>
   );
 };
 

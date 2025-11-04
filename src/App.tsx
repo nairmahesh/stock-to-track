@@ -10,6 +10,8 @@ import VendorDashboard from "./pages/VendorDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import NewOrder from "./pages/NewOrder";
 import ProductOrder from "./pages/ProductOrder";
+import CurrentOrders from "./pages/CurrentOrders";
+import PastOrders from "./pages/PastOrders";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +28,8 @@ const App = () => (
           <Route path="/dealer" element={<DealerDashboard />} />
           <Route path="/dealer/new-order" element={<NewOrder />} />
           <Route path="/dealer/order/:productId" element={<ProductOrder />} />
+          <Route path="/dealer/orders/current" element={<CurrentOrders />} />
+          <Route path="/dealer/orders/past" element={<PastOrders />} />
           <Route path="/vendor" element={<VendorDashboard />} />
           <Route path="/admin" element={<AdminDashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

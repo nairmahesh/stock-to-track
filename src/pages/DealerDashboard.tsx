@@ -5,8 +5,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Package, Clock, CheckCircle, XCircle, Truck, ShoppingCart, TrendingUp, Heart, Star } from "lucide-react";
+import { Plus, Package, Clock, CheckCircle, XCircle, Truck, ShoppingCart, TrendingUp, Heart } from "lucide-react";
 import { toast } from "sonner";
 
 interface Order {
@@ -37,7 +36,6 @@ const DealerDashboard = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [wishlist, setWishlist] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -187,31 +185,31 @@ const DealerDashboard = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
                 {products.map((product) => (
                   <Card 
                     key={product.id} 
-                    className="group hover:shadow-lg transition-all cursor-pointer relative overflow-hidden border-2 hover:border-primary/50"
-                    onClick={() => setSelectedProduct(product)}
+                    className="group hover:shadow-lg transition-all cursor-pointer relative overflow-hidden border hover:border-primary/50"
+                    onClick={() => navigate(`/dealer/order/${product.id}`)}
                   >
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         toggleWishlist(product.id);
                       }}
-                      className="absolute top-3 right-3 z-10 p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
+                      className="absolute top-2 right-2 z-10 p-1.5 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
                     >
                       <Heart 
-                        className={`h-4 w-4 transition-colors ${
+                        className={`h-3 w-3 transition-colors ${
                           wishlist.has(product.id) ? 'fill-red-500 text-red-500' : 'text-muted-foreground'
                         }`} 
                       />
                     </button>
                     
                     {isMostPurchased(product.name) && (
-                      <div className="absolute top-3 left-3 z-10">
-                        <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white border-0">
-                          <TrendingUp className="h-3 w-3 mr-1" />
+                      <div className="absolute top-2 left-2 z-10">
+                        <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white border-0 text-xs px-1.5 py-0.5">
+                          <TrendingUp className="h-2.5 w-2.5 mr-0.5" />
                           Popular
                         </Badge>
                       </div>
@@ -226,34 +224,26 @@ const DealerDashboard = () => {
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          <Package className="h-16 w-16 text-muted-foreground/40" />
+                          <Package className="h-8 w-8 text-muted-foreground/40" />
                         </div>
                       )}
                     </div>
 
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-sm flex items-center gap-2">
+                    <CardHeader className="p-3 pb-2">
+                      <CardTitle className="text-xs line-clamp-1">
                         {product.name}
-                        {product.category && (
-                          <Badge variant="secondary" className="text-xs">
-                            {product.category}
-                          </Badge>
-                        )}
                       </CardTitle>
-                      {product.description && (
-                        <CardDescription className="text-xs line-clamp-2">
-                          {product.description}
-                        </CardDescription>
+                      {product.category && (
+                        <Badge variant="secondary" className="text-[10px] w-fit px-1.5 py-0">
+                          {product.category}
+                        </Badge>
                       )}
                     </CardHeader>
                     
-                    <CardContent className="pt-0 space-y-2">
-                      {product.sku && (
-                        <p className="text-xs text-muted-foreground">SKU: {product.sku}</p>
-                      )}
+                    <CardContent className="p-3 pt-0">
                       {product.min_quantity && (
-                        <Badge variant="outline" className="text-xs">
-                          Min: {product.min_quantity} {product.unit_type || 'units'}
+                        <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                          Min: {product.min_quantity}
                         </Badge>
                       )}
                     </CardContent>
@@ -340,100 +330,6 @@ const DealerDashboard = () => {
           )}
         </div>
       </div>
-
-      <Dialog open={!!selectedProduct} onOpenChange={() => setSelectedProduct(null)}>
-        <DialogContent className="max-w-2xl">
-          {selectedProduct && (
-            <>
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-3">
-                  {selectedProduct.name}
-                  {isMostPurchased(selectedProduct.name) && (
-                    <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white border-0">
-                      <Star className="h-3 w-3 mr-1 fill-current" />
-                      Popular Item
-                    </Badge>
-                  )}
-                </DialogTitle>
-                <DialogDescription>
-                  {selectedProduct.category && `Category: ${selectedProduct.category}`}
-                </DialogDescription>
-              </DialogHeader>
-
-              <div className="space-y-4">
-                <div className="aspect-video relative overflow-hidden rounded-lg bg-muted">
-                  {selectedProduct.image_url ? (
-                    <img 
-                      src={selectedProduct.image_url} 
-                      alt={selectedProduct.name}
-                      className="w-full h-full object-contain"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Package className="h-24 w-24 text-muted-foreground/40" />
-                    </div>
-                  )}
-                </div>
-
-                <div className="space-y-3">
-                  {selectedProduct.description && (
-                    <div>
-                      <h4 className="font-semibold mb-1">Description</h4>
-                      <p className="text-sm text-muted-foreground">{selectedProduct.description}</p>
-                    </div>
-                  )}
-
-                  <div className="grid grid-cols-2 gap-4">
-                    {selectedProduct.sku && (
-                      <div>
-                        <h4 className="font-semibold mb-1 text-sm">SKU</h4>
-                        <p className="text-sm text-muted-foreground font-mono">{selectedProduct.sku}</p>
-                      </div>
-                    )}
-                    {selectedProduct.min_quantity && (
-                      <div>
-                        <h4 className="font-semibold mb-1 text-sm">Minimum Order</h4>
-                        <p className="text-sm text-muted-foreground">
-                          {selectedProduct.min_quantity} {selectedProduct.unit_type || 'units'}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  {selectedProduct.requires_dimensions && (
-                    <Badge variant="outline" className="w-fit">
-                      📏 Custom dimensions required
-                    </Badge>
-                  )}
-                </div>
-
-                <div className="flex gap-2 pt-4">
-                  <Button 
-                    className="flex-1" 
-                    onClick={() => {
-                      setSelectedProduct(null);
-                      navigate("/dealer/new-order");
-                    }}
-                  >
-                    <ShoppingCart className="h-4 w-4 mr-2" />
-                    Add to Order
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => toggleWishlist(selectedProduct.id)}
-                  >
-                    <Heart 
-                      className={`h-4 w-4 ${
-                        wishlist.has(selectedProduct.id) ? 'fill-red-500 text-red-500' : ''
-                      }`} 
-                    />
-                  </Button>
-                </div>
-              </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
     </DashboardLayout>
   );
 };

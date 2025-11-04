@@ -9,6 +9,7 @@ import DealerDashboard from "./pages/DealerDashboard";
 import VendorDashboard from "./pages/VendorDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import NewOrder from "./pages/NewOrder";
+import ProductOrder from "./pages/ProductOrder";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/dealer" element={<DealerDashboard />} />
           <Route path="/dealer/new-order" element={<NewOrder />} />
+          <Route path="/dealer/order/:productId" element={<ProductOrder />} />
           <Route path="/vendor" element={<VendorDashboard />} />
           <Route path="/admin" element={<AdminDashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
